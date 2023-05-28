@@ -25,7 +25,6 @@ function getSummonersPuuid(summonerName) {
     let APICallString = "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/" + summonerName + "?api_key="  + API_KEY;
 
     return axios.get(APICallString).then(function (response) {
-        console.log(response.data);
         return response.data.puuid;
     }).catch(function (error) {
         console.log(error);
@@ -54,10 +53,18 @@ app.get('/summonername', async (req, res) => {
 // localhost:4000/last5games
 app.get('/last5games', async (req, res) => {
     const summonerPuuid = await getSummonersPuuid(req.query.username);
-    console.log(summonerPuuid);
     const matches = await getLastSummonerGames(summonerPuuid);
 
-    res.json(matches);
+    let matchDataArray = [];
+    for(var i = 0; i < matches.length -15; i++) {
+        const matchID = matches[i];
+        const matchData = await axios.get("https://europe.api.riotgames.com/lol/match/v5/matches/" + matchID + "?api_key=" + API_KEY)
+            .then(response => response.data)
+            .catch(err => err);
+        matchDataArray.push(matchData);
+    }
+
+    res.json(matchDataArray);
 });
 
 app.listen(4000, function () {

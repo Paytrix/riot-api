@@ -44,6 +44,19 @@ export default function Body() {
         {matches.length !== 0 ?
           <>
             <p>We have data!</p>
+            {
+              matches.map((gameData, index) => 
+              <>
+                <h2>Game {index + 1}</h2>
+                <div>
+                  {gameData.info.participants.map((data, participantsIndex) =>
+                    <p>PLAYER {participantsIndex + 1}: {data.summonerName}, KDA: {data.kills} / {data.deaths} / {data.assists}</p>
+                  )  
+                  }
+                </div>
+              </>
+              )
+            }
           </>
         :
           <>
