@@ -7,6 +7,7 @@ export default function Body() {
     const [searchText, setSearchText] = useState("");
     const [playerData, setPlayerData] = useState({});
     const [matches, setMatches] = useState([]);
+    const [winrate, setWinrate] = useState();
     const API_KEY = "RGAPI-3e301ea5-16e4-4822-a03a-da36cc2a55ca";
   
     function searchForPlayer(event) {
@@ -20,9 +21,17 @@ export default function Body() {
         axios.get("http://localhost:4000/last5games", {params: { username: searchText }})
           .then(function (response) {
             setMatches(response.data);
+            console.log(matches);
           }).catch(function (error) {
             console.log(error);
           });
+
+          axios.get("http://localhost:4000/winrateLast20Games", {params: { username: searchText }})
+            .then(function (response) {
+              setWinrate(response.data);
+            }).catch(function (error) {
+              console.log(error);
+            });
     }
   
     return (
@@ -43,7 +52,7 @@ export default function Body() {
         }
         {matches.length !== 0 ?
           <>
-            <p>We have data!</p>
+            <p>Winrate of last 5 games: {winrate}</p>
             {
               matches.map((gameData, index) => 
               <>
