@@ -7,7 +7,6 @@ var app = express();
 app.use(cors());
 
 const API_KEY = "RGAPI-fda3d542-3411-4f40-af07-8422a6f181bb";
-let matchDataArray = [];
 
 function searchForPlayer(summonerName) {
     // Set up the correct API call
@@ -56,6 +55,8 @@ app.get('/last5games', async (req, res) => {
     const summonerPuuid = await getSummonersPuuid(req.query.username);
     const matches = await getLastSummonerGames(summonerPuuid);
 
+    let matchDataArray = [];
+
     for(var i = 0; i < matches.length -15; i++) {
         const matchID = matches[i];
         const matchData = await axios.get("https://europe.api.riotgames.com/lol/match/v5/matches/" + matchID + "?api_key=" + API_KEY)
@@ -68,23 +69,35 @@ app.get('/last5games', async (req, res) => {
 });
 
 app.get('/winrateLast20Games', async (req, res) => {
+    const summonerPuuid = await getSummonersPuuid(req.query.username);
+    const matches = await getLastSummonerGames(summonerPuuid);
     let totalWins = 0;
     let winrate = 10.0;
-    const username = req.query.username;
+    let matchDataArray = [];
 
+    for(var i = 0; i < matches.length; i++) {
+        const matchID = matches[i];
+        const matchData = await axios.get("https://europe.api.riotgames.com/lol/match/v5/matches/" + matchID + "?api_key=" + API_KEY)
+            .then(response => response.data)
+            .catch(err => err);
+        matchDataArray.push(matchData);
+    }
+    
     if(matchDataArray.length !== 0) {
         matchDataArray.map((gameData, index) => {
-            if(gameData.info.participants[index].summonerName === username) {
-                console.log(gameData.info.participants[index].summonerName);
-                console.log(gameData.info.participants[index].win);
-                if(gameData.info.participants[index].win) {
-                    totalWins++;
-                }
+            if(gameData.data.hasOwnProperty("info")) {
+                gameData.info.participants.map((data, participantsIndex) => {
+                    if(data.puuid === summonerPuuid) {
+                        if(data.win) {
+                            totalWins++;
+                        }
+                    }
+                })
             }
         });
     }
 
-    winrate = matchDataArray.length / totalWins;
+    winrate = totalWins / matchDataArray.length;
 
     res.json(winrate);
 });

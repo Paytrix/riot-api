@@ -52,15 +52,19 @@ export default function Body() {
         }
         {matches.length !== 0 ?
           <>
-            <p>Winrate of last 5 games: {winrate}</p>
+            <p>Winrate of last 20 games: {winrate}</p>
             {
               matches.map((gameData, index) => 
               <>
                 <h2>Game {index + 1}</h2>
                 <div>
-                  {gameData.info.participants.map((data, participantsIndex) =>
-                    <p>PLAYER {participantsIndex + 1}: {data.summonerName}, KDA: {data.kills} / {data.deaths} / {data.assists}</p>
-                  )  
+                  {
+                    gameData.data.hasOwnProperty("info") ?
+                    gameData.info.participants.map((data, participantsIndex) =>
+                      <p>PLAYER {participantsIndex + 1}: {data.summonerName}, KDA: {data.kills} / {data.deaths} / {data.assists}</p>
+                    ) 
+                    :
+                    {}
                   }
                 </div>
               </>
